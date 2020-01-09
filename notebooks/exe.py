@@ -26,7 +26,6 @@ def main(user, commande):
 
     #On veut pas tout calculer sa mère et juste lire comme des tapettes
     if commande == 1:
-        print('commande 1')
         get_house_and_work_place(user)
     
     return 1
@@ -55,7 +54,7 @@ def get_house_and_work_place(user):
         
     poi_dataset_user["Week_day"]
     poi_dataset_user.drop("Unnamed: 0",axis=1,inplace=True)
-    work_home_df = find_house_and_work_place(poi_dataset_user)
+    work_home_df = findPlace(poi_dataset_user)
     final_result_path = user_file_path + '\\res_user_' + user + '.csv'
     work_home_df.to_csv(final_result_path)
 
@@ -147,38 +146,46 @@ def identifyPOItoCatch(df):
         
     return pd.DataFrame({'Center':posArray,'Entry':timeArray,'deltaT':deltaTArray})
 
-def find_house_and_work_place(df):
-    house_poi_array = pd.DataFrame(columns=['Entry_date', 'DeltaT', 'Center','Size','Week_day'])
-    work_poi_array = pd.DataFrame(columns=['Entry_date', 'DeltaT', 'Center','Size','Week_day'])
-    
-    for index, row in df.iterrows():
+def findPlace(df):
+    #parsing columns
+    dfCopy = df.copy()
+    dfCopy["Entry_date"] = pd.to_datetime(dfCopy["Entry_date"])
+    dfCopy["day"] = dfCopy["Entry_date"].dt.dayofweek
+   
+    #groupby center to get the sum of size and deltaT
+    tmp = df.groupby(dfCopy['Center'].map(tuple)).sum()
+    tmp = tmp.rename(columns={"DeltaT": "TotalDeltaT", "Size": "TotalSize"})
 
-        day = int(row['Week_day'])
-        entry_hour = int(row['Entry_date'].hour)
-        exit_hour = row['Entry_date'] + np.timedelta64(int(row['DeltaT']), 's')
-        exit_hour = int(exit_hour.hour)
-        
-        if (day in range(0,5)) and (entry_hour in range(8,10)) and (exit_hour in range(16,19)):
-            work_poi_array=work_poi_array.append(row,ignore_index=True)
-            
-        if (day in range(0,5)) and (entry_hour in range(19,0)) and (exit_hour in range(5,9)):
-            house_poi_array=house_poi_array.append(row,ignore_index=True)
-            
-        if (day in range(6,7)):
-            house_poi_array=house_poi_array.append(row,ignore_index=True)
-              
-    work_place = work_poi_array['Center'].mode()
-    house = house_poi_array['Center'].mode()
-    
-    print("work place : ")
-    print(work_place)
-    
-    print("house place : ")
-    print(house)
+    #parsing before merge
+    dfCopy['Center'] = dfCopy['Center'].map(tuple)
 
-    ret = pd.DataFrame([[work_place, house]], columns=['work', 'house'])
+    #merge the two dataframe to get all informations in one df
+    res = pd.merge(dfCopy, tmp, on="Center")
     
-    return ret   
+    #get work place
+    workTimeMask = (res["Entry_date"].dt.hour > 9) & (res["Entry_date"].dt.hour < 12)
+    workDays = res.loc[res["day"] < 5].loc[workTimeMask]
+    workPlaceRow = workDays.loc[workDays["TotalDeltaT"].idxmax()]
+
+    #get living place
+    houseTimeMask = res["Entry_date"].dt.hour > 18
+    houseDays = res.loc[res["day"] < 5].loc[houseTimeMask]
+    houseRow = houseDays.loc[houseDays["TotalDeltaT"].idxmax()]
+    # houseRow.drop(['Unnamed: 0_x'],inplace=True)
+    # houseRow.drop(['Unnamed: 0_y'],inplace=True)
+    # workPlaceRow.drop(['Unnamed: 0_x'],inplace=True)
+    # workPlaceRow.drop(['Unnamed: 0_y'],inplace=True)
+    
+    #print(type(workPlaceRow))
+    df_interesting_places=pd.DataFrame(columns=houseRow.index)
+    df_interesting_places = df_interesting_places.append(workPlaceRow,ignore_index=True)
+    df_interesting_places = df_interesting_places.append(houseRow,ignore_index=True)
+    
+    labels=['Workplace','Living Place']
+    df_interesting_places['Place Category']=labels
+    
+    
+    return df_interesting_places 
         
 
 ##############################################
