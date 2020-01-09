@@ -9,20 +9,11 @@ import math
 ##############################################
 # Turbo variables                            #
 ##############################################
-user_file_path = "TROUVER LE USER PATH"
+user_file_path = "C:\\Users\\Maxime Dardy\\Documents\\5IF\\Systèmes répartis\\app\\notebooks\\poi"
 diameter = 500 ##Diameter of POI (in meter)
 duration = 60*120 ##Duration spent in zone to be considered as POI (in second)
 d2r = math.pi / 180
 milli2minute = 1000 * 60
-
-
-##############################################
-# C'est ici qu'on envoie du gros main sa mère#
-##############################################
-
-user = sys.argv[1]
-commande = sys.argv[2]
-main(user)
 
 
 def main(user, commande):
@@ -35,22 +26,24 @@ def main(user, commande):
 
     #On veut pas tout calculer sa mère et juste lire comme des tapettes
     if commande == 1:
+        print('commande 1')
         get_house_and_work_place(user)
     
     return 1
 
 def create_poi_user_file(user):
-    user_global_path = user_file_path + '/' + user + '.csv'
+    user_global_path = user_file_path + '\\user_' + user + '.csv'
     dataset_user = pd.read_csv(user_global_path)
     POI_df = identifyPOI(dataset_user)
     poi_df_final = identifyPOItoCatch(POI_df)
-    path_poi = user_file_path +  + '/poi_' + user + '.csv'
+    path_poi = user_file_path + '\\poi_user_' + user + '.csv'
     poi_df_final.to_csv(path_poi)
 
 def get_house_and_work_place(user):
 
-    user_poi_path = user_file_path +  + '/poi_' + user + '.csv'
-    poi_dataset_user = pd.read_csv(user_global_path)
+    print('get_house_and_work_place')
+    user_poi_path = user_file_path + '\\poi_user_' + user + '.csv'
+    poi_dataset_user = pd.read_csv(user_poi_path)
     poi_dataset_user['Center'] = poi_dataset_user.apply(change_to_pair, axis=1)
 
     poi_dataset_user['Entry_date']= pd.to_datetime(poi_dataset_user['Entry_date'])
@@ -63,7 +56,7 @@ def get_house_and_work_place(user):
     poi_dataset_user["Week_day"]
     poi_dataset_user.drop("Unnamed: 0",axis=1,inplace=True)
     work_home_df = find_house_and_work_place(poi_dataset_user)
-    final_result_path = user_file_path +  + '/res_' + user + '.csv'
+    final_result_path = user_file_path + '\\res_user_' + user + '.csv'
     work_home_df.to_csv(final_result_path)
 
 
@@ -188,3 +181,10 @@ def find_house_and_work_place(df):
     return ret   
         
 
+##############################################
+# C'est ici qu'on envoie du gros main sa mère#
+##############################################
+
+user = sys.argv[1]
+commande = int(sys.argv[2])
+print(main(user,commande))
