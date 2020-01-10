@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App from './App/App';
 import * as serviceWorker from './serviceWorker';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
 import {
@@ -11,7 +11,7 @@ import {
   PRIMARY_DARK_COLOR,
   SECONDARY_DARK_COLOR,
   SECONDARY_LIGHT_COLOR,
-} from './theme';
+} from './App/theme';
 
 const theme = createMuiTheme({
   palette: {
