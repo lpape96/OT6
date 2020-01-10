@@ -4,8 +4,9 @@ import {
   CardContent,
   FormControlLabel,
   Checkbox,
+  Button,
 } from '@material-ui/core';
-
+import userService from '../../api/user';
 import ImportButton from './ImportButton';
 
 interface T {
@@ -24,6 +25,11 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
   ) => {
     setCheckBox({ ...checkBox, [name]: event.target.checked });
   };
+  const handleClick = async () => {
+    const res = await userService.postUserLogs({ file: 'n' });
+    console.log(res);
+  };
+
   return (
     <Card style={{ width: '400px' }} elevation={14}>
       <CardContent
@@ -54,6 +60,7 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
           }
           label="Afficher votre lieu de travail"
         />
+        <Button onClick={handleClick}>Cliquez pour lancer</Button>
       </CardContent>
     </Card>
   );
