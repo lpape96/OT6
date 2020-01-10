@@ -1,14 +1,17 @@
 const express = require('express');
-const routes = require('./routes/index');
-const app = express();
-const logger = require('./logger');
 const cors = require('cors');
-// const mongoose = require('mongoose');
-// const db = require('./utils/db');
+const fileUpload = require('express-fileupload');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const logger = require('./logger');
+const routes = require('./routes/index');
 const WEB_CONFIG = require('./config/web');
 
-//app.use(express.json());
-//app.use(express.urlencoded({ extended: false }));
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(fileUpload());
 /*
 app.use(express.static(path.join(__dirname, 'dist/RepriseOrdi')));
 app.use('/', express.static(path.join(__dirname, 'dist/RepriseOrdi')));
