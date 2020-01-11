@@ -27,6 +27,10 @@ def main(user, commande):
     #On veut pas tout calculer sa mère et juste lire comme des tapettes
     if commande == 1:
         get_house_and_work_place(user)
+
+    if commande == 2:
+        get_house_and_work_place(user)
+        find_path_to_work(user)
     
     return 1
 
@@ -39,8 +43,6 @@ def create_poi_user_file(user):
     poi_df_final.to_csv(path_poi)
 
 def get_house_and_work_place(user):
-
-    print('get_house_and_work_place')
     user_poi_path = user_file_path + '/poi_' + user
     poi_dataset_user = pd.read_csv(user_poi_path)
     poi_dataset_user['Center'] = poi_dataset_user.apply(change_to_pair, axis=1)
@@ -171,12 +173,7 @@ def findPlace(df):
     houseTimeMask = res["Entry_date"].dt.hour > 18
     houseDays = res.loc[res["day"] < 5].loc[houseTimeMask]
     houseRow = houseDays.loc[houseDays["TotalDeltaT"].idxmax()]
-    # houseRow.drop(['Unnamed: 0_x'],inplace=True)
-    # houseRow.drop(['Unnamed: 0_y'],inplace=True)
-    # workPlaceRow.drop(['Unnamed: 0_x'],inplace=True)
-    # workPlaceRow.drop(['Unnamed: 0_y'],inplace=True)
     
-    #print(type(workPlaceRow))
     df_interesting_places=pd.DataFrame(columns=houseRow.index)
     df_interesting_places = df_interesting_places.append(workPlaceRow,ignore_index=True)
     df_interesting_places = df_interesting_places.append(houseRow,ignore_index=True)
@@ -185,7 +182,82 @@ def findPlace(df):
     df_interesting_places['Place Category']=labels
     
     
-    return df_interesting_places 
+    return df_interesting_places
+
+def get_second_day(df):
+
+    df.drop(df[df['day'] == df.iloc[0]['day']], inplace=True)
+
+
+
+def find_path_to_work(user):
+    user_trace_path = user_file_path + '\\user_' + user + '.csv'
+    user_trace_df = pd.read_csv(user_trace_path)
+
+    user_trace_df["Date"] = pd.to_datetime(user_trace_df["Date"])
+    user_trace_df["weekday"] = user_trace_df["Date"].dt.dayofweek
+    user_trace_df["day"] = user_trace_df["Date"].dt.date
+
+    #Delete first day
+    user_trace_df = user_trace_df[user_trace_df['day'] != user_trace_df.iloc[0]['day']]
+
+    final_result_path = user_file_path + '\\res_user_' + user + '.csv'
+    user_result_df = pd.read_csv(final_result_path)
+
+    user_result_df['Center'] = user_result_df.apply(change_to_pair, axis=1)
+
+    workLat = user_result_df['Center'].iloc(0)[0][0] 
+    workLong = user_result_df['Center'].iloc(0)[0][1]
+    houseLat = user_result_df['Center'].iloc(0)[1][0] 
+    houseLong = user_result_df['Center'].iloc(0)[1][1]
+
+    hourFilter = (user_trace_df["Date"].dt.hour > 7 ) & (user_trace_df["Date"].dt.hour < 10)
+
+    #morningDf = user_trace_df.loc[user_trace_df["weekday"] == 1].loc[hourFilter]
+    morningDf = user_trace_df.loc[user_trace_df["weekday"] == 1]
+
+    print('Morning DF')
+    print(morningDf)
+    print(user_trace_df[user_trace_df["Date"].dt.hour > 7])
+
+    firstDate = morningDf.iloc[0]["day"]
+
+    morningDayDf = morningDf.loc[morningDf["day"] == firstDate]
+    print(morningDayDf.shape)
+    for index, row in morningDayDf.iterrows():
+        dist = distance(houseLat, houseLong, row['Lat'], row['Long'])
+        if dist < 30:
+            houseRow = row
+
+    res = pd.DataFrame(columns=['Id','Date','Long','Lat','weekday','day'])
+        
+    for index, row in morningDayDf[morningDayDf['day'] >= houseRow['day']].iterrows():
+        dist = distance(workLat, workLong, row['Lat'], row['Long'])
+        if dist > 10:
+            res = res.append(row, ignore_index=True)
+        else:
+            break
+            
+    Q1Long = np.percentile(res['Long'],10)
+    Q3Long = np.percentile(res['Long'],85)
+
+    Q1Lat = np.percentile(res['Lat'],10)
+    Q3Lat = np.percentile(res['Lat'],85)
+
+    filterLong = (res['Long'] > Q1Long) & (res['Long'] < Q3Long)
+    filterLat = (res['Lat'] > Q1Lat) & (res['Lat'] < Q3Lat)
+
+
+    res = res[filterLong]
+    print(res.shape)
+    res = res[filterLat]
+    print(res.shape)
+
+    path_trace = user_file_path + '\\trace_user_' + user + '.csv'
+    res[['Long','Lat']].to_csv(path_trace)
+
+
+
         
 
 ##############################################
