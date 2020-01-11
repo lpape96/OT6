@@ -130,7 +130,67 @@ def normalize_POI(poi_dataframe):
     return poi_dataframe
 
                 
-
+def identifyPOI(df):
+    POI_df = pd.DataFrame(columns=['Entry_date','DeltaT','Center','Size'])
+    isEmpty = True
+    latArray = []
+    longArray = []
+    timeArray = []
+    for index, row in df.iterrows():
+        date = datetime.strptime(row.Date.split('.')[0], '%Y-%m-%d %H:%M:%S')
+        lat = row.Lat
+        long = row.Long
+        
+        ##First entry
+        if len(latArray) == 0 :
+            latArray.append(lat)
+            longArray.append(long)
+            timeArray.append(date)
+            isEmpty = False
+            continue
+        
+        ##If still in the same POI
+        if(distance(latArray[0], longArray[0], lat, long) < diameter):
+            latArray.append(lat)
+            longArray.append(long)
+            timeArray.append(date)
+        ##If new entry outside of actual POI
+        else:
+            dTime = timeArray[-1] - timeArray[0]
+            if (dTime.total_seconds() < duration):
+                
+                ##Check if new instance is ok
+                while (distance(latArray[0],longArray[0],lat,long) >= diameter):
+                    latArray.pop(0)
+                    longArray.pop(0)
+                    timeArray.pop(0)
+                    
+                    if(len(latArray) == 0):
+                        isEmpty = True
+                        break
+            ##Else valid POI
+            else :
+                center = getCenter(latArray,longArray)
+                deltaT = timeArray[-1] - timeArray[0]
+                deltaT = deltaT.total_seconds()
+                POI_df = POI_df.append({'Entry_date':timeArray[0],'DeltaT':deltaT,'Center':center,'Size':len(latArray)},ignore_index=True)
+    
+                
+                latArray.clear()
+                longArray.clear()
+                timeArray.clear()
+                
+            latArray.append(lat)
+            longArray.append(long)
+            timeArray.append(date)
+    
+    if isEmpty == False :
+        center = getCenter(latArray,longArray)
+        deltaT = timeArray[-1] - timeArray[0]
+        deltaT = deltaT.total_seconds()
+        POI_df = POI_df.append({'Entry_date':timeArray[0],'DeltaT':deltaT,'Center':center,'Size':len(latArray)},ignore_index=True)
+    
+    return POI_df
 
 def identifyPOItoCatch(df):
     timeArray = df['Entry_date']
@@ -222,7 +282,7 @@ def find_path_to_work(user):
 
     firstDate = morningDf.iloc[0]["day"]
 
-    morningDayDf = morningDf.loc[morningDf["day"] == firstDate]
+    morningDayDf = morningDf.loc[morningDf["day"] != firstDate]
     print(morningDayDf.shape)
     for index, row in morningDayDf.iterrows():
         dist = distance(houseLat, houseLong, row['Lat'], row['Long'])
