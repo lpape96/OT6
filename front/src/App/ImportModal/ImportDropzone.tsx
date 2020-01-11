@@ -30,6 +30,13 @@ const ImportDropzone = ({ file, setFile }: IProps) => {
     setFile(filesAccepted[0]);
   };
 
+  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setFile(files[0]);
+    }
+  };
+
   const onRemove = () => {
     setFile(undefined);
   };
@@ -38,12 +45,12 @@ const ImportDropzone = ({ file, setFile }: IProps) => {
     <Dropzone
       onDrop={onDrop}
       disabled={file !== undefined}
-      accept=".xls, .xlsx, .xlsm"
+      accept=".xls, .xlsx, .xlsm, .csv, .jpg"
     >
       {({ getRootProps, getInputProps, isDragActive }: any) => {
         return (
           <div {...getRootProps()} className={classes.dropzone}>
-            <input {...getInputProps()} />
+            <input {...getInputProps()} type="file" name="file" />
             {isDragActive ? (
               !file && <p>Faites glisser le fichier ici</p>
             ) : (
@@ -75,6 +82,14 @@ const ImportDropzone = ({ file, setFile }: IProps) => {
                       </p>
                     </>
                   )}
+                  <input
+                    type="file"
+                    onChange={onInput}
+                    id="importProfil"
+                    name="importProfil"
+                    disabled={file !== undefined}
+                    style={{ display: 'none' }}
+                  />
                   {file && (
                     <Chip
                       style={{

@@ -6,7 +6,9 @@ const userService = {
     return res.data;
   },
   async postUserLogs(body) {
-    await API.post('api/user/userLogs', body, {});
+    await API.post('api/user/userLogs', body, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   },
 };
 
