@@ -9,7 +9,7 @@ import math
 ##############################################
 # Turbo variables                            #
 ##############################################
-user_file_path = "C:\\Users\\Maxime Dardy\\Documents\\5IF\\Systèmes répartis\\app\\notebooks\\poi"
+user_file_path = "/Users/clementguittat/Documents/INSA LYON/5A/Système reparti/OT6/notebooks/poi"
 diameter = 500 ##Diameter of POI (in meter)
 duration = 60*120 ##Duration spent in zone to be considered as POI (in second)
 d2r = math.pi / 180
@@ -31,17 +31,17 @@ def main(user, commande):
     return 1
 
 def create_poi_user_file(user):
-    user_global_path = user_file_path + '\\user_' + user + '.csv'
+    user_global_path = user_file_path + '/' + user
     dataset_user = pd.read_csv(user_global_path)
     POI_df = identifyPOI(dataset_user)
     poi_df_final = identifyPOItoCatch(POI_df)
-    path_poi = user_file_path + '\\poi_user_' + user + '.csv'
+    path_poi = user_file_path + '/poi_' + user
     poi_df_final.to_csv(path_poi)
 
 def get_house_and_work_place(user):
 
     print('get_house_and_work_place')
-    user_poi_path = user_file_path + '\\poi_user_' + user + '.csv'
+    user_poi_path = user_file_path + '/poi_' + user
     poi_dataset_user = pd.read_csv(user_poi_path)
     poi_dataset_user['Center'] = poi_dataset_user.apply(change_to_pair, axis=1)
 
@@ -55,7 +55,7 @@ def get_house_and_work_place(user):
     poi_dataset_user["Week_day"]
     poi_dataset_user.drop("Unnamed: 0",axis=1,inplace=True)
     work_home_df = findPlace(poi_dataset_user)
-    final_result_path = user_file_path + '\\res_user_' + user + '.csv'
+    final_result_path = user_file_path + '/res_' + user
     work_home_df.to_csv(final_result_path)
 
 

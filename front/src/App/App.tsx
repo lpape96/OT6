@@ -18,7 +18,16 @@ const STYLE_CONTAINER: React.CSSProperties = {
   height: '100%',
 };
 
+export interface ResType {
+  userName: string;
+  latHome: string;
+  longHome: string;
+  latWork: string;
+  longWork: string;
+}
+
 const App = () => {
+  const [usersData, setUsersData] = useState<ResType[] | undefined>();
   const [checkBox, setCheckBox] = useState({
     house: false,
     work: false,
@@ -28,8 +37,13 @@ const App = () => {
     <div style={STYLE_APP}>
       <Header />
       <div style={STYLE_CONTAINER}>
-        <Banner checkBox={checkBox} setCheckBox={setCheckBox} />
-        <GoogleMaps checkBox={checkBox} />
+        <Banner
+          checkBox={checkBox}
+          setCheckBox={setCheckBox}
+          usersData={usersData}
+          setUsersData={setUsersData}
+        />
+        <GoogleMaps checkBox={checkBox} usersData={usersData} />
       </div>
     </div>
   );
