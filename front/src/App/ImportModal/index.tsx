@@ -30,13 +30,13 @@ const ImportModal = ({ isDropzoneVisible, setIsDropzoneVisible }: IProps) => {
         data.append('filename', file.name);
         const result = await userService.postUserLogs(data);
         dispatch({
-          type: 'addUsers',
+          type: 'addUser',
           value: [
             {
-              latHome: result[0].lat,
-              longHome: result[0].long,
-              latWork: result[1].lat,
-              longWork: result[1].long,
+              latHome: result.res[0].lat,
+              longHome: result.res[0].long,
+              latWork: result.res[1].lat,
+              longWork: result.res[1].long,
               userName: file.name,
             },
           ],

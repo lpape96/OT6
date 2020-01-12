@@ -24,3 +24,4 @@ yarn-error.log*
 
 notebooks/privamov/
 notebooks/split_dataset/
+notebooks/poi/**

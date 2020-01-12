@@ -9,7 +9,7 @@ import math
 ##############################################
 # Turbo variables                            #
 ##############################################
-user_file_path = "/Users/clementguittat/Documents/INSA LYON/5A/Système reparti/OT6/notebookspoi"
+user_file_path = "/Users/clementguittat/Documents/INSA LYON/5A/Système reparti/OT6/notebooks/poi"
 diameter = 500 ##Diameter of POI (in meter)
 duration = 60*120 ##Duration spent in zone to be considered as POI (in second)
 d2r = math.pi / 180
@@ -214,6 +214,9 @@ def identifyPOItoCatch(df):
 
 def findPlace(df):
     #parsing columns
+    print('enter')
+    print(df)
+
     dfCopy = df.copy()
     dfCopy["Entry_date"] = pd.to_datetime(dfCopy["Entry_date"])
     dfCopy["day"] = dfCopy["Entry_date"].dt.dayofweek
@@ -231,6 +234,7 @@ def findPlace(df):
     #get living place
     houseTimeMask = res["Entry_date"].dt.hour > 18
     houseDays = res.loc[res["day"] < 5].loc[houseTimeMask]
+    print(houseDays)
     houseRow = houseDays.loc[houseDays["TotalDeltaT"].idxmax()]
     
     houseRowCenter = houseRow['Center']
