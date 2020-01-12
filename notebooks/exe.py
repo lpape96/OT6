@@ -9,7 +9,7 @@ import math
 ##############################################
 # Turbo variables                            #
 ##############################################
-user_file_path = "C:\\Users\\Maxime Dardy\\Documents\\5IF\\Systèmes répartis\\app\\notebooks\\poi"
+user_file_path = "/Users/clementguittat/Documents/INSA LYON/5A/Système reparti/OT6/notebookspoi"
 diameter = 500 ##Diameter of POI (in meter)
 duration = 60*120 ##Duration spent in zone to be considered as POI (in second)
 d2r = math.pi / 180
@@ -34,15 +34,15 @@ def main(user, commande):
     return 1
 
 def create_poi_user_file(user):
-    user_global_path = user_file_path + '\\user_' + user + '.csv'
+    user_global_path = user_file_path + '/' + user
     dataset_user = pd.read_csv(user_global_path)
     POI_df = identifyPOI(dataset_user)
-    path_poi = user_file_path + '\\poi_user_' + user + '.csv'
+    path_poi = user_file_path + '/poi_' + user
     POI_df.to_csv(path_poi)
 
 def get_house_and_work_place(user):
 
-    user_poi_path = user_file_path + '\\poi_user_' + user + '.csv'
+    user_poi_path = user_file_path + '/poi_' + user
     poi_dataset_user = pd.read_csv(user_poi_path)
     poi_dataset_user['Center'] = poi_dataset_user.apply(change_to_pair, axis=1)
 
@@ -57,7 +57,7 @@ def get_house_and_work_place(user):
     poi_dataset_user.drop("Unnamed: 0",axis=1,inplace=True)
     poi_dataset_user = normalize_POI(poi_dataset_user)
     work_home_df = findPlace(poi_dataset_user)
-    final_result_path = user_file_path + '\\res_user_' + user + '.csv'
+    final_result_path = user_file_path + '/res_' + user
     work_home_df.to_csv(final_result_path)
 
 
@@ -267,7 +267,7 @@ def get_second_day(df):
 
 
 def find_path_to_work(user):
-    user_trace_path = user_file_path + '\\user_' + user + '.csv'
+    user_trace_path = user_file_path + '/' + user
     user_trace_df = pd.read_csv(user_trace_path)
 
     user_trace_df["Date"] = pd.to_datetime(user_trace_df["Date"])
@@ -277,7 +277,7 @@ def find_path_to_work(user):
     #Delete first day
     user_trace_df = user_trace_df[user_trace_df['day'] != user_trace_df.iloc[0]['day']]
 
-    final_result_path = user_file_path + '\\res_user_' + user + '.csv'
+    final_result_path = user_file_path + '/res_' + user
     user_result_df = pd.read_csv(final_result_path)
 
     user_result_df['Center'] = user_result_df.apply(change_to_pair, axis=1)
@@ -328,7 +328,7 @@ def find_path_to_work(user):
     res = res[filterLat]
     print(res.shape)
 
-    path_trace = user_file_path + '\\trace_user_' + user + '.csv'
+    path_trace = user_file_path + '/trace_' + user
     res[['Long','Lat']].to_csv(path_trace)
 
 
