@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { ActionButton } from '../common/ActionButton';
 import ImportModal from '../ImportModal';
-import { ResType } from '../App';
 
-interface IProps {
-  setUsersData: (usersData: ResType[] | undefined) => void;
-}
-
-const ImportButton = ({ setUsersData }: IProps) => {
+const ImportButton = () => {
   const [isDropzoneVisible, setIsDropzoneVisible] = useState(false);
 
   const handleImport = () => {
@@ -29,7 +24,6 @@ const ImportButton = ({ setUsersData }: IProps) => {
       <ImportModal
         isDropzoneVisible={isDropzoneVisible}
         setIsDropzoneVisible={setIsDropzoneVisible}
-        setUsersData={setUsersData}
       />
     </div>
   );

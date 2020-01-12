@@ -12,12 +12,11 @@ import {
 } from 'react-google-maps';
 import InfoBoxDemo from './InfoBoxDemo';
 import MarkerClustererDemo from './MarkerClustererDemo';
-import { ResType } from '../App';
+import { useUsersDataContext } from '../UsersDataContext/store';
 // import DirectionsDemo from './DirectionsDemo';
 
 interface IProps {
   checkBox: { house: boolean; work: boolean };
-  usersData: ResType[] | undefined;
 }
 
 const GoogleMaps = compose<any, IProps>(
@@ -30,12 +29,12 @@ const GoogleMaps = compose<any, IProps>(
   }),
   withScriptjs,
   withGoogleMap
-)(({ checkBox, usersData }: IProps) => {
+)(({ checkBox }: IProps) => {
   const [isOpen, setIsOpen] = useState({
     house: false,
     work: false,
   });
-
+  const { usersData } = useUsersDataContext();
   const onToggleOpen = (name: string) => (event?: google.maps.MouseEvent) => {
     setIsOpen({ ...isOpen, [name]: !!event });
   };

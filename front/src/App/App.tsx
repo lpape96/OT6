@@ -4,6 +4,7 @@ import Header from './Header';
 // import Maps from './Maps';
 import Banner from './Banner';
 import GoogleMaps from './GoogleMaps';
+import UsersDataProvider from './UsersDataContext/store';
 
 const STYLE_APP: React.CSSProperties = {
   display: 'flex',
@@ -27,25 +28,21 @@ export interface ResType {
 }
 
 const App = () => {
-  const [usersData, setUsersData] = useState<ResType[] | undefined>();
   const [checkBox, setCheckBox] = useState({
     house: false,
     work: false,
   });
 
   return (
-    <div style={STYLE_APP}>
-      <Header />
-      <div style={STYLE_CONTAINER}>
-        <Banner
-          checkBox={checkBox}
-          setCheckBox={setCheckBox}
-          usersData={usersData}
-          setUsersData={setUsersData}
-        />
-        <GoogleMaps checkBox={checkBox} usersData={usersData} />
+    <UsersDataProvider>
+      <div style={STYLE_APP}>
+        <Header />
+        <div style={STYLE_CONTAINER}>
+          <Banner checkBox={checkBox} setCheckBox={setCheckBox} />
+          <GoogleMaps checkBox={checkBox} />
+        </div>
       </div>
-    </div>
+    </UsersDataProvider>
   );
 };
 

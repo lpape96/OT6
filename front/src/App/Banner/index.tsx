@@ -7,6 +7,7 @@ import {
 } from '@material-ui/core';
 import ImportButton from './ImportButton';
 import { ResType } from '../App';
+import { useUsersDataContext } from '../UsersDataContext/store';
 
 interface T {
   house: boolean;
@@ -16,11 +17,11 @@ interface T {
 interface IProps {
   checkBox: T;
   setCheckBox: (elem: T) => void;
-  usersData: ResType[] | undefined;
-  setUsersData: (data: ResType[] | undefined) => void;
 }
 
-const Banner = ({ checkBox, setCheckBox, usersData, setUsersData }: IProps) => {
+const Banner = ({ checkBox, setCheckBox }: IProps) => {
+  const { usersData } = useUsersDataContext();
+
   const handleChange = (name: string) => (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -34,7 +35,7 @@ const Banner = ({ checkBox, setCheckBox, usersData, setUsersData }: IProps) => {
           margin: '20px 0px 0px',
         }}
       >
-        <ImportButton setUsersData={setUsersData} />
+        <ImportButton />
         {usersData?.map((user: ResType) => (
           <div key={user.userName}>
             <h1>Informations de {user.userName}</h1>

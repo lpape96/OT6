@@ -3,21 +3,17 @@ import Dialog from '@material-ui/core/Dialog';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ImportFile from './ImportFile';
 import userService from '../../api/user';
-import { ResType } from '../App';
+import { useUsersDataContext } from '../UsersDataContext/store';
 
 interface IProps {
   isDropzoneVisible: boolean;
   setIsDropzoneVisible: (bool: boolean) => void;
-  setUsersData: (usersData: ResType[] | undefined) => void;
 }
 
-const ImportModal = ({
-  isDropzoneVisible,
-  setIsDropzoneVisible,
-  setUsersData,
-}: IProps) => {
+const ImportModal = ({ isDropzoneVisible, setIsDropzoneVisible }: IProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<File | undefined>();
+  const { dispatch } = useUsersDataContext();
 
   const handleClose = () => {
     setIsDropzoneVisible(false);
@@ -33,15 +29,18 @@ const ImportModal = ({
         data.append('file', file);
         data.append('filename', file.name);
         const result = await userService.postUserLogs(data);
-        setUsersData([
-          {
-            latHome: result[0].lat,
-            longHome: result[0].long,
-            latWork: result[1].lat,
-            longWork: result[1].long,
-            userName: file.name,
-          },
-        ]);
+        dispatch({
+          type: 'addUsers',
+          value: [
+            {
+              latHome: result[0].lat,
+              longHome: result[0].long,
+              latWork: result[1].lat,
+              longWork: result[1].long,
+              userName: file.name,
+            },
+          ],
+        });
       } catch (e) {
         console.log('error', e);
       } finally {
