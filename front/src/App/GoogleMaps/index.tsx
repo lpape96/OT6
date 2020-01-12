@@ -7,16 +7,14 @@ import {
   withGoogleMap,
   GoogleMap,
   Marker,
-  Circle,
   InfoWindow,
+  Polyline,
 } from 'react-google-maps';
-import InfoBoxDemo from './InfoBoxDemo';
-import MarkerClustererDemo from './MarkerClustererDemo';
 import { useUsersDataContext } from '../UsersDataContext/store';
 // import DirectionsDemo from './DirectionsDemo';
 
 interface IProps {
-  checkBox: { house: boolean; work: boolean };
+  checkBox: { house: boolean; work: boolean; poi: boolean; trace: boolean };
 }
 
 const GoogleMaps = compose<any, IProps>(
@@ -41,7 +39,7 @@ const GoogleMaps = compose<any, IProps>(
 
   return (
     <GoogleMap defaultZoom={13} defaultCenter={{ lat: 45.75, lng: 4.85 }}>
-      {checkBox.house && usersData && (
+      {checkBox.house && usersData && usersData.length && (
         <Marker
           position={{
             lat: parseFloat(usersData[0].latHome),
@@ -56,12 +54,19 @@ const GoogleMaps = compose<any, IProps>(
           )}
         </Marker>
       )}
-      {checkBox.work && usersData && (
+      {checkBox.work && usersData && usersData.length && (
         <Marker
           position={{
             lat: parseFloat(usersData[0].latWork),
             lng: parseFloat(usersData[0].longWork),
           }}
+          // options={{
+          //   icon: {
+          //     url:
+          //       'https://maps.google.com/mapfiles/kml/shapes/homegardenbusiness.png',
+          //     size: { width: 5, height: 5, equals: _ => {} },
+          //   },
+          // }}
           onClick={onToggleOpen('work')}
         >
           {isOpen.work && (
@@ -71,16 +76,35 @@ const GoogleMaps = compose<any, IProps>(
           )}
         </Marker>
       )}
-      <InfoBoxDemo />
-      <MarkerClustererDemo />
-      <Circle
-        defaultCenter={{ lat: 45.75, lng: 4.85 }}
-        radius={2000}
-        visible={true}
-        onDblClick={(e: google.maps.MouseEvent) => {
-          e.stop();
-        }}
-      />
+      {checkBox.trace && usersData && usersData.length && (
+        <Polyline
+          path={usersData[0].trace}
+          options={{
+            strokeColor: '#ff0000',
+          }}
+        />
+      )}
+      {checkBox.poi &&
+        usersData &&
+        usersData.length &&
+        usersData[0].poi.map(
+          (elem: { lat: string; lng: string }, index: number) => {
+            return (
+              <Marker
+                key={index}
+                position={{
+                  lat: parseFloat(elem.lat),
+                  lng: parseFloat(elem.lng),
+                }}
+                options={{
+                  opacity: 0.5,
+                }}
+                onClick={onToggleOpen('work')}
+              />
+            );
+          }
+        )}
+      {/* <InfoBoxDemo /> */}
       {/* <DirectionsDemo /> */}
     </GoogleMap>
   );

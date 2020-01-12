@@ -16,7 +16,7 @@ const STYLE_APP: React.CSSProperties = {
 
 const STYLE_CONTAINER: React.CSSProperties = {
   display: 'flex',
-  height: '100%',
+  height: '88.5%',
 };
 
 export interface ResType {
@@ -25,12 +25,16 @@ export interface ResType {
   longHome: string;
   latWork: string;
   longWork: string;
+  poi: [{ lat: string; lng: string }];
+  trace: [{ lat: number; lng: number }];
 }
 
 const App = () => {
   const [checkBox, setCheckBox] = useState({
     house: false,
     work: false,
+    poi: false,
+    trace: false,
   });
 
   return (
