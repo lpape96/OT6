@@ -4,6 +4,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import ImportFile from './ImportFile';
 import userService from '../../api/user';
 import { useUsersDataContext } from '../UsersDataContext/store';
+import usePopMessage from '../PopMessages/usePopMessage';
 
 interface IProps {
   isDropzoneVisible: boolean;
@@ -14,6 +15,7 @@ const ImportModal = ({ isDropzoneVisible, setIsDropzoneVisible }: IProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<File | undefined>();
   const { dispatch } = useUsersDataContext();
+  const popMessage = usePopMessage();
 
   const handleClose = () => {
     setIsDropzoneVisible(false);
@@ -40,11 +42,15 @@ const ImportModal = ({ isDropzoneVisible, setIsDropzoneVisible }: IProps) => {
               poi: result.poi,
               trace: result.trace,
               userName: file.name,
+              covoit: undefined,
             },
           ],
         });
+        popMessage.success('Informations utilisateur bien importées');
       } catch (e) {
-        console.log('error', e);
+        popMessage.error(
+          "Erreur lors de l'import des informations utilisateur"
+        );
       } finally {
         handleClose();
       }

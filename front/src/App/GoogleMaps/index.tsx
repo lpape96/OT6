@@ -60,13 +60,6 @@ const GoogleMaps = compose<any, IProps>(
             lat: parseFloat(usersData[0].latWork),
             lng: parseFloat(usersData[0].longWork),
           }}
-          // options={{
-          //   icon: {
-          //     url:
-          //       'https://maps.google.com/mapfiles/kml/shapes/homegardenbusiness.png',
-          //     size: { width: 5, height: 5, equals: _ => {} },
-          //   },
-          // }}
           onClick={onToggleOpen('work')}
         >
           {isOpen.work && (
@@ -103,6 +96,25 @@ const GoogleMaps = compose<any, IProps>(
               />
             );
           }
+        )}
+      {usersData &&
+        usersData.length &&
+        usersData[0].covoit &&
+        usersData[0].covoit.map(
+          (covoit: { lat: string; lng: string }, index: number) => (
+            <Marker
+              key={index}
+              position={{
+                lat: parseFloat(covoit.lat),
+                lng: parseFloat(covoit.lng),
+              }}
+              options={{
+                icon: {
+                  url: 'http://maps.google.com/mapfiles/ms/icons/cabs.png',
+                },
+              }}
+            />
+          )
         )}
       {/* <InfoBoxDemo /> */}
       {/* <DirectionsDemo /> */}

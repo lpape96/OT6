@@ -27,6 +27,10 @@ const UsersDataProvider = ({ children }: IProps) => {
         case 'addUser':
           const newState = [...state, ...action.value];
           return newState;
+        case 'addCovoit':
+          const newVar = [...state];
+          newVar[0].covoit = action.value[0].covoit;
+          return newVar;
         default:
           throw new Error();
       }

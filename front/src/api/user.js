@@ -11,6 +11,10 @@ const userService = {
     });
     return res.data;
   },
+  async getUserCovoit(filename) {
+    const res = await API.get('api/user/userCovoit?filename=' + filename);
+    return res.data;
+  },
 };
 
 export default userService;

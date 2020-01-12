@@ -124,7 +124,28 @@ async function addUserInfo(req, res) {
     });
 }
 
+async function getCovoit(req, res) {
+  const nameFile = req.query.filename;
+  console.log(nameFile);
+  const dataCovoit = [];
+  fs.createReadStream(`../notebooks/poi/covoit_${nameFile}`)
+    .on('error', (err) => {
+      res.status(500).send(err);
+    })
+    .pipe(csv())
+    .on('data', (row) => {
+      let latLong = row.Center.split(',');
+      let lat = latLong[0].substring(1);
+      let long = latLong[1].substring(1, latLong[1].length - 1);
+      dataCovoit.push({ lat: lat, lng: long });
+    })
+    .on('end', () => {
+      res.send(dataCovoit);
+    });
+}
+
 module.exports = {
   getAllUserRes,
   addUserInfo,
+  getCovoit,
 };

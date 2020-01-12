@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import Header from './Header';
-// import Button from '@material-ui/core/Button';
-// import Maps from './Maps';
 import Banner from './Banner';
 import GoogleMaps from './GoogleMaps';
 import UsersDataProvider from './UsersDataContext/store';
+import PopMessages from './PopMessages';
 
 const STYLE_APP: React.CSSProperties = {
   display: 'flex',
@@ -27,6 +26,7 @@ export interface ResType {
   longWork: string;
   poi: [{ lat: string; lng: string }];
   trace: [{ lat: number; lng: number }];
+  covoit?: [{ lat: string; lng: string }];
 }
 
 const App = () => {
@@ -39,13 +39,15 @@ const App = () => {
 
   return (
     <UsersDataProvider>
-      <div style={STYLE_APP}>
-        <Header />
-        <div style={STYLE_CONTAINER}>
-          <Banner checkBox={checkBox} setCheckBox={setCheckBox} />
-          <GoogleMaps checkBox={checkBox} />
+      <PopMessages>
+        <div style={STYLE_APP}>
+          <Header />
+          <div style={STYLE_CONTAINER}>
+            <Banner checkBox={checkBox} setCheckBox={setCheckBox} />
+            <GoogleMaps checkBox={checkBox} />
+          </div>
         </div>
-      </div>
+      </PopMessages>
     </UsersDataProvider>
   );
 };

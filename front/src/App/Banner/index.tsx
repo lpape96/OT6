@@ -4,11 +4,15 @@ import {
   CardContent,
   FormControlLabel,
   Checkbox,
+  IconButton,
 } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 import ImportButton from './ImportButton';
 import { ResType } from '../App';
 import { useUsersDataContext } from '../UsersDataContext/store';
 import { ActionButton } from '../common/ActionButton';
+import userService from '../../api/user';
+import usePopMessage from '../PopMessages/usePopMessage';
 
 interface T {
   house: boolean;
@@ -23,7 +27,8 @@ interface IProps {
 }
 
 const Banner = ({ checkBox, setCheckBox }: IProps) => {
-  const { usersData } = useUsersDataContext();
+  const { usersData, dispatch } = useUsersDataContext();
+  const popMessage = usePopMessage();
 
   const handleChange = (name: string) => (
     event: React.ChangeEvent<HTMLInputElement>
@@ -31,8 +36,19 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
     setCheckBox({ ...checkBox, [name]: event.target.checked });
   };
 
-  const handleCovoit = () => {
-    console.log('in');
+  const handleCovoit = (filename: string) => async () => {
+    const res = await userService.getUserCovoit(filename);
+    const tempUser = [...usersData];
+    tempUser[0].covoit = res;
+    dispatch({ type: 'addCovoit', value: tempUser });
+    popMessage.success('Utilisateurs en co-voiturage ajoutés');
+  };
+
+  const handleDelete = () => {
+    const tempUser = [...usersData];
+    tempUser[0].covoit = undefined;
+    dispatch({ type: 'addCovoit', value: tempUser });
+    popMessage.info('Utilisateurs en co-voiturage supprimés');
   };
 
   return (
@@ -46,7 +62,7 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
         {usersData?.map((user: ResType) => (
           <div key={user.userName}>
             <h2>
-              Informations de{" l'"}
+              Informations de l'
               {user.userName.substring(0, user.userName.length - 4)}
             </h2>
             <FormControlLabel
@@ -93,9 +109,14 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
               }
               label="Afficher le chemin habituel"
             />
-            <ActionButton onClick={handleCovoit} color="primary">
+            <ActionButton onClick={handleCovoit(user.userName)} color="primary">
               Covoiturage
             </ActionButton>
+            {usersData[0].covoit && (
+              <IconButton onClick={handleDelete}>
+                <DeleteIcon />
+              </IconButton>
+            )}
           </div>
         ))}
       </CardContent>
