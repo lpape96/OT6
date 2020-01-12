@@ -361,6 +361,7 @@ def find_path_to_work(user):
 
     path_trace = user_file_path + '/trace_' + user + '.csv'
     res[['Long','Lat']].to_csv(path_trace)
+
 def areColleagues (lat1,lng1,lat2,lng2):
 
     max_dist=500 #distance maximale entre 2 coordonnees de travail pour dire si 2 personnes travaillent au meme endroit
@@ -396,8 +397,10 @@ def covoit(places_user1,places_user2):
     if(collegues == True and neighbors in (1,2)):
          covoit = 'Yes'
     else :  covoit = 'No'
+
+    center = [house_user2.iloc[0][0],house_user2.iloc[0][1]]
     
-    return [collegues,neighbors,covoit]
+    return [collegues,neighbors,covoit,center]
 
 def getData():
     datas = pd.DataFrame(columns=['Entry_date','DeltaT','Center','Size','day','TotalDeltaT','TotalSize','Place Category','user_id'])
@@ -424,14 +427,15 @@ def getData():
     return datas
 
 def checkCovoit(df,user):
-    covoit_df = pd.DataFrame(columns={'user_id','Live near','Work near','Can covoit'})
+    covoit_df = pd.DataFrame(columns={'user_id','Live near','Work near','Can covoit','Center'})
     places_user=df.loc[df['user_id']==user]
     for id_user in df['user_id'].unique():
         if (id_user == user) : continue
         places = df.loc[df['user_id']==id_user]
-        [collegues, neighbors, covoiturage] = covoit(places_user,places)
-        covoit_df = covoit_df.append({'user_id':id_user,'Live near':neighbors,'Work near':collegues,'Can covoit':covoiturage},ignore_index=True)
+        [collegues, neighbors, covoiturage, center] = covoit(places_user,places)
+        covoit_df = covoit_df.append({'user_id':id_user,'Live near':neighbors,'Work near':collegues,'Can covoit':covoiturage,'Center':center},ignore_index=True)
     return covoit_df
+
 
 
         
