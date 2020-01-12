@@ -3,6 +3,7 @@ import Dialog from '@material-ui/core/Dialog';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ImportFile from './ImportFile';
 import userService from '../../api/user';
+import { useUsersDataContext } from '../UsersDataContext/store';
 
 interface IProps {
   isDropzoneVisible: boolean;
@@ -12,7 +13,7 @@ interface IProps {
 const ImportModal = ({ isDropzoneVisible, setIsDropzoneVisible }: IProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<File | undefined>();
-  const [importResult, setImportResult] = useState<any | undefined>();
+  const { dispatch } = useUsersDataContext();
 
   const handleClose = () => {
     setIsDropzoneVisible(false);
@@ -28,12 +29,22 @@ const ImportModal = ({ isDropzoneVisible, setIsDropzoneVisible }: IProps) => {
         data.append('file', file);
         data.append('filename', file.name);
         const result = await userService.postUserLogs(data);
-        setImportResult(result);
+        dispatch({
+          type: 'addUsers',
+          value: [
+            {
+              latHome: result[0].lat,
+              longHome: result[0].long,
+              latWork: result[1].lat,
+              longWork: result[1].long,
+              userName: file.name,
+            },
+          ],
+        });
       } catch (e) {
-        console.log(e);
+        console.log('error', e);
       } finally {
-        setLoading(false);
-        console.log(importResult);
+        handleClose();
       }
     }
   };

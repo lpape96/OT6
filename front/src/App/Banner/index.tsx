@@ -4,10 +4,10 @@ import {
   CardContent,
   FormControlLabel,
   Checkbox,
-  Button,
 } from '@material-ui/core';
-import userService from '../../api/user';
 import ImportButton from './ImportButton';
+import { ResType } from '../App';
+import { useUsersDataContext } from '../UsersDataContext/store';
 
 interface T {
   house: boolean;
@@ -20,14 +20,12 @@ interface IProps {
 }
 
 const Banner = ({ checkBox, setCheckBox }: IProps) => {
+  const { usersData } = useUsersDataContext();
+
   const handleChange = (name: string) => (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setCheckBox({ ...checkBox, [name]: event.target.checked });
-  };
-  const handleClick = async () => {
-    const res = await userService.postUserLogs({ file: 'n' });
-    console.log(res);
   };
 
   return (
@@ -38,29 +36,33 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
         }}
       >
         <ImportButton />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={checkBox.house}
-              onChange={handleChange('house')}
-              value="house"
-              color="secondary"
+        {usersData?.map((user: ResType) => (
+          <div key={user.userName}>
+            <h1>Informations de {user.userName}</h1>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkBox.house}
+                  onChange={handleChange('house')}
+                  value="house"
+                  color="secondary"
+                />
+              }
+              label="Afficher votre logement"
             />
-          }
-          label="Afficher votre logement"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={checkBox.work}
-              onChange={handleChange('work')}
-              value="work"
-              color="secondary"
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkBox.work}
+                  onChange={handleChange('work')}
+                  value="work"
+                  color="secondary"
+                />
+              }
+              label="Afficher votre lieu de travail"
             />
-          }
-          label="Afficher votre lieu de travail"
-        />
-        <Button onClick={handleClick}>Cliquez pour lancer</Button>
+          </div>
+        ))}
       </CardContent>
     </Card>
   );

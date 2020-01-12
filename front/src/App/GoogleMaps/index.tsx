@@ -12,6 +12,7 @@ import {
 } from 'react-google-maps';
 import InfoBoxDemo from './InfoBoxDemo';
 import MarkerClustererDemo from './MarkerClustererDemo';
+import { useUsersDataContext } from '../UsersDataContext/store';
 // import DirectionsDemo from './DirectionsDemo';
 
 interface IProps {
@@ -33,16 +34,19 @@ const GoogleMaps = compose<any, IProps>(
     house: false,
     work: false,
   });
-
+  const { usersData } = useUsersDataContext();
   const onToggleOpen = (name: string) => (event?: google.maps.MouseEvent) => {
     setIsOpen({ ...isOpen, [name]: !!event });
   };
 
   return (
     <GoogleMap defaultZoom={13} defaultCenter={{ lat: 45.75, lng: 4.85 }}>
-      {checkBox.house && (
+      {checkBox.house && usersData && (
         <Marker
-          position={{ lat: 45.76, lng: 4.86 }}
+          position={{
+            lat: parseFloat(usersData[0].latHome),
+            lng: parseFloat(usersData[0].longHome),
+          }}
           onClick={onToggleOpen('house')}
         >
           {isOpen.house && (
@@ -52,9 +56,12 @@ const GoogleMaps = compose<any, IProps>(
           )}
         </Marker>
       )}
-      {checkBox.work && (
+      {checkBox.work && usersData && (
         <Marker
-          position={{ lat: 45.78, lng: 4.88 }}
+          position={{
+            lat: parseFloat(usersData[0].latWork),
+            lng: parseFloat(usersData[0].longWork),
+          }}
           onClick={onToggleOpen('work')}
         >
           {isOpen.work && (
@@ -72,7 +79,6 @@ const GoogleMaps = compose<any, IProps>(
         visible={true}
         onDblClick={(e: google.maps.MouseEvent) => {
           e.stop();
-          console.log('clicked');
         }}
       />
       {/* <DirectionsDemo /> */}
