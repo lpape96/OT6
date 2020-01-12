@@ -9,7 +9,7 @@ import math
 ##############################################
 # Turbo variables                            #
 ##############################################
-user_file_path = "/Users/clementguittat/Documents/INSA LYON/5A/Système reparti/OT6/notebookspoi"
+user_file_path = "C:\\Users\\Maxime Dardy\\Documents\\5IF\\Systèmes répartis\\app\\notebooks\\poi"
 diameter = 500 ##Diameter of POI (in meter)
 duration = 60*120 ##Duration spent in zone to be considered as POI (in second)
 d2r = math.pi / 180
@@ -30,22 +30,22 @@ def main(user, commande):
     if commande == 2:
         get_house_and_work_place(user)
         find_path_to_work(user)
-
+    
     if commande == 3:
 
     
     return 1
 
 def create_poi_user_file(user):
-    user_global_path = user_file_path + '/' + user
+    user_global_path = user_file_path + '\\user_' + user + '.csv'
     dataset_user = pd.read_csv(user_global_path)
     POI_df = identifyPOI(dataset_user)
-    path_poi = user_file_path + '/poi_' + user
+    path_poi = user_file_path + '\\poi_user_' + user + '.csv'
     POI_df.to_csv(path_poi)
 
 def get_house_and_work_place(user):
 
-    user_poi_path = user_file_path + '/poi_' + user
+    user_poi_path = user_file_path + '\\poi_user_' + user + '.csv'
     poi_dataset_user = pd.read_csv(user_poi_path)
     poi_dataset_user['Center'] = poi_dataset_user.apply(change_to_pair, axis=1)
 
@@ -60,7 +60,7 @@ def get_house_and_work_place(user):
     poi_dataset_user.drop("Unnamed: 0",axis=1,inplace=True)
     poi_dataset_user = normalize_POI(poi_dataset_user)
     work_home_df = findPlace(poi_dataset_user)
-    final_result_path = user_file_path + '/res_' + user
+    final_result_path = user_file_path + '\\res_user_' + user + '.csv'
     work_home_df.to_csv(final_result_path)
 
 
@@ -270,7 +270,7 @@ def get_second_day(df):
 
 
 def find_path_to_work(user):
-    user_trace_path = user_file_path + '/' + user
+    user_trace_path = user_file_path + '\\user_' + user + '.csv'
     user_trace_df = pd.read_csv(user_trace_path)
 
     user_trace_df["Date"] = pd.to_datetime(user_trace_df["Date"])
@@ -280,7 +280,7 @@ def find_path_to_work(user):
     #Delete first day
     user_trace_df = user_trace_df[user_trace_df['day'] != user_trace_df.iloc[0]['day']]
 
-    final_result_path = user_file_path + '/res_' + user
+    final_result_path = user_file_path + '\\res_user_' + user + '.csv'
     user_result_df = pd.read_csv(final_result_path)
 
     user_result_df['Center'] = user_result_df.apply(change_to_pair, axis=1)
@@ -290,7 +290,7 @@ def find_path_to_work(user):
     houseLat = user_result_df['Center'].iloc(0)[1][0] 
     houseLong = user_result_df['Center'].iloc(0)[1][1]
 
-    hourFilter = (user_trace_df["Date"].dt.hour >= 5 ) & (user_trace_df["Date"].dt.hour < 8)
+    hourFilter = (user_trace_df["Date"].dt.hour > 7 ) & (user_trace_df["Date"].dt.hour < 10)
 
     morningDf = user_trace_df.loc[user_trace_df["weekday"] != 1].loc[hourFilter]
 
@@ -331,11 +331,11 @@ def find_path_to_work(user):
     res = res[filterLat]
     print(res.shape)
 
-    path_trace = user_file_path + '/trace_' + user
+    path_trace = user_file_path + '\\trace_user_' + user + '.csv'
     res[['Long','Lat']].to_csv(path_trace)
 
 def areColleagues (lat1,lng1,lat2,lng2):
-    max_dist=100 #distance maximale entre 2 coordonnees de travail pour dire si 2 personnes travaillent au meme endroit
+    max_dist=500 #distance maximale entre 2 coordonnees de travail pour dire si 2 personnes travaillent au meme endroit
     if(distance(lat1,lng1,lat2,lng2) < max_dist):
         return True
     else:
@@ -366,6 +366,18 @@ def covoit(places_user1,places_user2):
         return True
     else : return False
 
+def getData(users):
+    datas = pd.DataFrame(columns=['Entry_date','DeltaT','Center','Size','day','TotalDeltaT','TotalSize','Place Category','user_id'])
+    for user in users:
+        poi_user = pd.read_csv('./poi/poi_user_'+str(user)+'.csv')
+        poi_user['Center'] = poi_user.apply(change_to_pair, axis=1)
+        poi_user = normalize_POI(poi_user)
+        places_user = findPlace(poi_user)
+        print('--------------------------',user,'----------------------------')
+        datas = datas.append(places_user,ignore_index=True)
+        datas.iloc[-1,-1] = user
+        datas.iloc[-2,-1] = user
+    return datas
 
         
 
