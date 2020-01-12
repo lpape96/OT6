@@ -8,10 +8,13 @@ import {
 import ImportButton from './ImportButton';
 import { ResType } from '../App';
 import { useUsersDataContext } from '../UsersDataContext/store';
+import { ActionButton } from '../common/ActionButton';
 
 interface T {
   house: boolean;
   work: boolean;
+  poi: boolean;
+  trace: boolean;
 }
 
 interface IProps {
@@ -28,8 +31,12 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
     setCheckBox({ ...checkBox, [name]: event.target.checked });
   };
 
+  const handleCovoit = () => {
+    console.log('in');
+  };
+
   return (
-    <Card style={{ width: '400px' }} elevation={14}>
+    <Card style={{ width: '400px', overflow: 'auto' }} elevation={14}>
       <CardContent
         style={{
           margin: '20px 0px 0px',
@@ -38,7 +45,10 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
         <ImportButton />
         {usersData?.map((user: ResType) => (
           <div key={user.userName}>
-            <h1>Informations de {user.userName}</h1>
+            <h2>
+              Informations de{" l'"}
+              {user.userName.substring(0, user.userName.length - 4)}
+            </h2>
             <FormControlLabel
               control={
                 <Checkbox
@@ -61,6 +71,31 @@ const Banner = ({ checkBox, setCheckBox }: IProps) => {
               }
               label="Afficher votre lieu de travail"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkBox.poi}
+                  onChange={handleChange('poi')}
+                  value="poi"
+                  color="secondary"
+                />
+              }
+              label="Afficher les points d'intérêts"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkBox.trace}
+                  onChange={handleChange('trace')}
+                  value="trace"
+                  color="secondary"
+                />
+              }
+              label="Afficher le chemin habituel"
+            />
+            <ActionButton onClick={handleCovoit} color="primary">
+              Covoiturage
+            </ActionButton>
           </div>
         ))}
       </CardContent>

@@ -33,10 +33,12 @@ const ImportModal = ({ isDropzoneVisible, setIsDropzoneVisible }: IProps) => {
           type: 'addUser',
           value: [
             {
-              latHome: result.res[0].lat,
-              longHome: result.res[0].long,
-              latWork: result.res[1].lat,
-              longWork: result.res[1].long,
+              latHome: result.res[1].lat,
+              longHome: result.res[1].long,
+              latWork: result.res[0].lat,
+              longWork: result.res[0].long,
+              poi: result.poi,
+              trace: result.trace,
               userName: file.name,
             },
           ],

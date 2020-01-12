@@ -68,16 +68,14 @@ function readStream(stream, dataOneUser) {
 
 async function addUserInfo(req, res) {
   const nameFile = req.body.filename;
-  let imageFile = req.files.file;
+  // let imageFile = req.files.file;
 
   // imageFile.mv(`../notebooks/poi/${nameFile}`, function(err) {
   //   if (err) {
   //     return res.status(500).send(err);
   //   }
   // });
-  // console.log('innnn');
   // await pythonController.askPython(nameFile);
-  // console.log('python');
   const nameFileRes = 'res_' + nameFile;
   const nameFilePoi = 'poi_' + nameFile;
   const nameFiletrace = 'trace_' + nameFile;
@@ -106,7 +104,7 @@ async function addUserInfo(req, res) {
           let latLong = row.Center.split(',');
           let lat = latLong[0].substring(1);
           let long = latLong[1].substring(1, latLong[1].length - 1);
-          dataPoi.push({ lat, long });
+          dataPoi.push({ lat, lng: long });
         })
         .on('end', () => {
           fs.createReadStream(`../notebooks/poi/${nameFiletrace}`)
@@ -115,12 +113,9 @@ async function addUserInfo(req, res) {
             })
             .pipe(csv())
             .on('data', (row) => {
-              // let latLong = row.Center.split(',');
-              // let lat = latLong[0].substring(1);
-              // let long = latLong[1].substring(1, latLong[1].length - 1);
-              let lat = row.Lat;
-              let long = row.Long;
-              dataTrace.push({ lat, long });
+              let lat = parseFloat(row.Lat);
+              let long = parseFloat(row.Long);
+              dataTrace.push({ lat: lat, lng: long });
             })
             .on('end', () => {
               res.send({ res: dataRes, poi: dataPoi, trace: dataTrace });

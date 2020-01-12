@@ -41,7 +41,6 @@ const UsersDataProvider = ({ children }: IProps) => {
   const getUsersData = async () => {
     try {
       // const usersRes = await userService.getUserRes();
-      console.log('inn');
       dispatch({ type: 'addUser', value: [] });
     } catch (e) {
       console.log(e);

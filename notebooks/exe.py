@@ -22,6 +22,7 @@ def main(user, commande):
     if commande == 0:
         create_poi_user_file(user)
         get_house_and_work_place(user)
+        find_path_to_work(user)
 
     #On veut pas tout calculer sa mère et juste lire comme des tapettes
     if commande == 1:
@@ -31,9 +32,6 @@ def main(user, commande):
         get_house_and_work_place(user)
         find_path_to_work(user)
 
-    if commande == 3:
-
-    
     return 1
 
 def create_poi_user_file(user):
@@ -274,7 +272,7 @@ def get_second_day(df):
 
 
 def find_path_to_work(user):
-    user_trace_path = user_file_path + '/' + user + '.csv'
+    user_trace_path = user_file_path + '/' + user
     user_trace_df = pd.read_csv(user_trace_path)
 
     user_trace_df["Date"] = pd.to_datetime(user_trace_df["Date"])
@@ -284,7 +282,7 @@ def find_path_to_work(user):
     #Delete first day
     user_trace_df = user_trace_df[user_trace_df['day'] != user_trace_df.iloc[0]['day']]
 
-    final_result_path = user_file_path + '/res_' + user + '.csv'
+    final_result_path = user_file_path + '/res_' + user
     user_result_df = pd.read_csv(final_result_path)
 
     user_result_df['Center'] = user_result_df.apply(change_to_pair, axis=1)
@@ -344,7 +342,7 @@ def find_path_to_work(user):
     res = res[filterLat]
     print(res.shape)
 
-    path_trace = user_file_path + '/trace_' + user + '.csv'
+    path_trace = user_file_path + '/trace_' + user
     res[['Long','Lat']].to_csv(path_trace)
 
 def areColleagues (lat1,lng1,lat2,lng2):
