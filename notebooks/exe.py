@@ -9,7 +9,7 @@ import math
 ##############################################
 # Turbo variables                            #
 ##############################################
-user_file_path = "/Users/clementguittat/Documents/INSA LYON/5A/Système reparti/OT6/notebooks/poi"
+user_file_path = "/Users/clementguittat/Documents/INSA LYON/5A/Système reparti/OT6/notebookspoi"
 diameter = 500 ##Diameter of POI (in meter)
 duration = 60*120 ##Duration spent in zone to be considered as POI (in second)
 d2r = math.pi / 180
@@ -22,7 +22,6 @@ def main(user, commande):
     if commande == 0:
         create_poi_user_file(user)
         get_house_and_work_place(user)
-        find_path_to_work(user)
 
     #On veut pas tout calculer sa mère et juste lire comme des tapettes
     if commande == 1:
@@ -32,7 +31,29 @@ def main(user, commande):
         get_house_and_work_place(user)
         find_path_to_work(user)
 
+    if commande == 3:
+        covoit_perfectly_process_with_honnor()
+    
+    if commande == 5:
+        normalize_poi_file(user)
+    
     return 1
+
+def normalize_poi_file(user):
+    user_poi_path = user_file_path + '/poi_' + user
+    poi_dataset_user = pd.read_csv(user_poi_path)
+    poi_dataset_user.drop("Unnamed: 0",axis=1,inplace=True)
+    poi_dataset_user['Center'] = poi_dataset_user.apply(change_to_pair, axis=1)
+    poi_dataset_user = normalize_POI(poi_dataset_user)
+    poi_dataset_user = poi_dataset_user.groupby(poi_dataset_user['Center'].map(tuple)).sum()
+    normalized_path = user_file_path + '/normalized_poi' + user
+    poi_dataset_user.to_csv(normalized_path)
+
+def covoit_perfectly_process_with_honnor():
+    datas = getData()
+    covoit = checkCovoit(datas,27)
+    can_covoit_path = user_file_path + '/can_covoit.csv'
+    covoit.to_csv(can_covoit_path)
 
 def create_poi_user_file(user):
     user_global_path = user_file_path + '/' + user
@@ -215,9 +236,6 @@ def identifyPOItoCatch(df):
 
 def findPlace(df):
     #parsing columns
-    print('enter')
-    print(df)
-
     dfCopy = df.copy()
     dfCopy["Entry_date"] = pd.to_datetime(dfCopy["Entry_date"])
     dfCopy["day"] = dfCopy["Entry_date"].dt.dayofweek
@@ -235,7 +253,6 @@ def findPlace(df):
     #get living place
     houseTimeMask = res["Entry_date"].dt.hour > 18
     houseDays = res.loc[res["day"] < 5].loc[houseTimeMask]
-    print(houseDays)
     houseRow = houseDays.loc[houseDays["TotalDeltaT"].idxmax()]
     
     houseRowCenter = houseRow['Center']
@@ -272,7 +289,7 @@ def get_second_day(df):
 
 
 def find_path_to_work(user):
-    user_trace_path = user_file_path + '/' + user
+    user_trace_path = user_file_path + '/' + user + '.csv'
     user_trace_df = pd.read_csv(user_trace_path)
 
     user_trace_df["Date"] = pd.to_datetime(user_trace_df["Date"])
@@ -282,7 +299,7 @@ def find_path_to_work(user):
     #Delete first day
     user_trace_df = user_trace_df[user_trace_df['day'] != user_trace_df.iloc[0]['day']]
 
-    final_result_path = user_file_path + '/res_' + user
+    final_result_path = user_file_path + '/res_' + user + '.csv'
     user_result_df = pd.read_csv(final_result_path)
 
     user_result_df['Center'] = user_result_df.apply(change_to_pair, axis=1)
@@ -342,12 +359,13 @@ def find_path_to_work(user):
     res = res[filterLat]
     print(res.shape)
 
-    path_trace = user_file_path + '/trace_' + user
+    path_trace = user_file_path + '/trace_' + user + '.csv'
     res[['Long','Lat']].to_csv(path_trace)
 
 def areColleagues (lat1,lng1,lat2,lng2):
-    max_dist=100 #distance maximale entre 2 coordonnees de travail pour dire si 2 personnes travaillent au meme endroit
-    if(distance(lat1,lng1,lat2,lng2) < max_dist):
+
+    max_dist=500 #distance maximale entre 2 coordonnees de travail pour dire si 2 personnes travaillent au meme endroit
+    if(distance(float(lat1),float(lng1),float(lat2),float(lng2)) < max_dist):
         return True
     else:
         return False
@@ -370,12 +388,54 @@ def covoit(places_user1,places_user2):
     work_user2 = places_user2.Center.loc[places_user2['Place Category'] == 'Workplace']
     house_user2 = places_user2.Center.loc[places_user2['Place Category'] == 'Living Place']
     
-    collegues = areColleagues(work_user1[0][0],work_user1[0][1], work_user2[0][0],work_user2[0][1])
-    neighbors = areLivingTogether(house_user1[1][0],house_user1[1][1], house_user2[1][0],house_user2[1][1])
+    print(work_user1.iloc[0][0],work_user1.iloc[0][1], work_user2.iloc[0][0],work_user2.iloc[0][1])
+    
+    collegues = areColleagues(work_user1.iloc[0][0],work_user1.iloc[0][1], work_user2.iloc[0][0],work_user2.iloc[0][1])
+    neighbors = areLivingTogether(house_user1.iloc[0][0],house_user1.iloc[0][1], house_user2.iloc[0][0],house_user2.iloc[0][1])
+
     
     if(collegues == True and neighbors in (1,2)):
-        return True
-    else : return False
+         covoit = 'Yes'
+    else :  covoit = 'No'
+
+    center = [house_user2.iloc[0][0],house_user2.iloc[0][1]]
+    
+    return [collegues,neighbors,covoit,center]
+
+def getData():
+    datas = pd.DataFrame(columns=['Entry_date','DeltaT','Center','Size','day','TotalDeltaT','TotalSize','Place Category','user_id'])
+
+    places_user_27 = pd.read_csv('.\\poi\\res_user_27.csv')
+    places_user_27['Center'] = places_user_27.apply(change_to_pair, axis=1)
+    places_fictif_3 = pd.read_csv('.\\poi\\fictif_user3.csv')
+    places_fictif_3['Center'] = places_fictif_3.apply(change_to_pair, axis=1)
+    places_fictif_4 = pd.read_csv('.\\poi\\fictif_user4.csv')
+    places_fictif_4['Center'] = places_fictif_4.apply(change_to_pair, axis=1)
+    
+    datas = datas.append(places_user_27, ignore_index=True)
+    datas.iloc[-1,-1] = 27
+    datas.iloc[-2,-1] = 27
+
+    datas = datas.append(places_fictif_3, ignore_index=True)
+    datas.iloc[-1,-1] = 3
+    datas.iloc[-2,-1] = 3
+
+    datas = datas.append(places_fictif_4, ignore_index=True)
+    datas.iloc[-1,-1] = 4
+    datas.iloc[-2,-1] = 4
+
+    return datas
+
+def checkCovoit(df,user):
+    covoit_df = pd.DataFrame(columns={'user_id','Live near','Work near','Can covoit','Center'})
+    places_user=df.loc[df['user_id']==user]
+    for id_user in df['user_id'].unique():
+        if (id_user == user) : continue
+        places = df.loc[df['user_id']==id_user]
+        [collegues, neighbors, covoiturage, center] = covoit(places_user,places)
+        covoit_df = covoit_df.append({'user_id':id_user,'Live near':neighbors,'Work near':collegues,'Can covoit':covoiturage,'Center':center},ignore_index=True)
+    return covoit_df
+
 
 
         
