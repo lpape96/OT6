@@ -55,6 +55,7 @@ def get_house_and_work_place(user):
         
     poi_dataset_user["Week_day"]
     poi_dataset_user.drop("Unnamed: 0",axis=1,inplace=True)
+    poi_dataset_user = normalize_POI(poi_dataset_user)
     work_home_df = findPlace(poi_dataset_user)
     final_result_path = user_file_path + '\\res_user_' + user + '.csv'
     work_home_df.to_csv(final_result_path)
@@ -198,21 +199,8 @@ def identifyPOItoCatch(df):
     posArray = df['Center']
     deltaTArray = df['DeltaT']
 
-    print(df)
-    print("J vaut 1 fdp")
-    print(posArray[0][0],posArray[0][1],posArray[1][0],posArray[1][1])
-
     for i in range(0, len(posArray)):
         for j in range(0,len(posArray)):
-            
-            # print(j)
-            # print(i)
-            # print(posArray[i][0])
-            # print(posArray[i][1])
-            # print(posArray[j][0])
-            # print(posArray[j][1])
-            print('PosArray du cul')
-            print(posArray)
 
             if (distance(posArray[i][0],posArray[i][1],posArray[j][0],posArray[j][1]) < diameter):
                 posArray.drop(labels=[j],inplace=True)
@@ -240,22 +228,27 @@ def findPlace(df):
     #merge the two dataframe to get all informations in one df
     res = pd.merge(dfCopy, tmp, on="Center")
     
-    #get work place
-    workTimeMask = (res["Entry_date"].dt.hour > 8) & (res["Entry_date"].dt.hour < 12)
-    workDays = res.loc[res["day"] < 5].loc[workTimeMask]
-    workPlaceRow = workDays.loc[workDays["TotalDeltaT"].idxmax()]
-
-    print("Work")
-    print(workPlaceRow)
-
     #get living place
     houseTimeMask = res["Entry_date"].dt.hour > 18
     houseDays = res.loc[res["day"] < 5].loc[houseTimeMask]
     houseRow = houseDays.loc[houseDays["TotalDeltaT"].idxmax()]
     
-    print('House')
-    print(houseRow)
+    houseRowCenter = houseRow['Center']
+    print(res.shape)
+    res.drop(res[res['Center'] == houseRowCenter].index, inplace=True)
+    print(res.shape)
 
+    
+    #get work place
+    workTimeMask = (res["Entry_date"].dt.hour > 9) & (res["Entry_date"].dt.hour < 12)
+    workDays = res.loc[res["day"] < 5].loc[workTimeMask]
+    print("work days infos :   ", workDays.head())
+    workPlaceRow = workDays.loc[workDays["TotalDeltaT"].idxmax()]
+    
+    print("Work place coord : ", workPlaceRow["Center"])
+    print("Living place coord : ", houseRow["Center"])
+    
+    #print(type(workPlaceRow))
     df_interesting_places=pd.DataFrame(columns=houseRow.index)
     df_interesting_places = df_interesting_places.append(workPlaceRow,ignore_index=True)
     df_interesting_places = df_interesting_places.append(houseRow,ignore_index=True)
@@ -265,6 +258,7 @@ def findPlace(df):
     
     
     return df_interesting_places
+
 
 def get_second_day(df):
 
