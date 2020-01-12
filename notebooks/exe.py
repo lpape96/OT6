@@ -270,7 +270,7 @@ def get_second_day(df):
 
 
 def find_path_to_work(user):
-    user_trace_path = user_file_path + '/' + user
+    user_trace_path = user_file_path + '/' + user + '.csv'
     user_trace_df = pd.read_csv(user_trace_path)
 
     user_trace_df["Date"] = pd.to_datetime(user_trace_df["Date"])
@@ -280,7 +280,7 @@ def find_path_to_work(user):
     #Delete first day
     user_trace_df = user_trace_df[user_trace_df['day'] != user_trace_df.iloc[0]['day']]
 
-    final_result_path = user_file_path + '/res_' + user
+    final_result_path = user_file_path + '/res_' + user + '.csv'
     user_result_df = pd.read_csv(final_result_path)
 
     user_result_df['Center'] = user_result_df.apply(change_to_pair, axis=1)
@@ -289,22 +289,31 @@ def find_path_to_work(user):
     workLong = user_result_df['Center'].iloc(0)[0][1]
     houseLat = user_result_df['Center'].iloc(0)[1][0] 
     houseLong = user_result_df['Center'].iloc(0)[1][1]
-
+    
+    print("House lat :",houseLat)
+    print("House lng :", houseLong)
+    print("workLat :",workLat)
+    print("workLong :",workLong)
     hourFilter = (user_trace_df["Date"].dt.hour >= 5 ) & (user_trace_df["Date"].dt.hour < 8)
 
-    morningDf = user_trace_df.loc[user_trace_df["weekday"] != 1].loc[hourFilter]
+    morningDf = user_trace_df.loc[user_trace_df["weekday"] == 1].loc[hourFilter]
+    #morningDayDf = user_trace_df.loc[user_trace_df["weekday"] == 1].loc[hourFilter]
+    #morningDf = user_trace_df.loc[user_trace_df["weekday"] == 1]
 
     print('Morning DF')
     print(morningDf)
-    print(user_trace_df[user_trace_df["Date"].dt.hour > 7])
+    #print(user_trace_df[user_trace_df["Date"].dt.hour > 7])
 
     firstDate = morningDf.iloc[0]["day"]
 
-    morningDayDf = morningDf.loc[morningDf["day"] == firstDate]
-    print(morningDayDf.shape)
+    morningDayDf = morningDf.loc[morningDf["day"] != firstDate]
+
+   # houseRow=pd.DataFrame(data=None, columns=morningDayDf.columns, index=morningDayDf.index)
     for index, row in morningDayDf.iterrows():
         dist = distance(houseLat, houseLong, row['Lat'], row['Long'])
-        if dist < 30:
+        #print(dist)
+        if dist <30:
+            #print("Je passe")
             houseRow = row
 
     res = pd.DataFrame(columns=['Id','Date','Long','Lat','weekday','day'])
@@ -331,7 +340,7 @@ def find_path_to_work(user):
     res = res[filterLat]
     print(res.shape)
 
-    path_trace = user_file_path + '/trace_' + user
+    path_trace = user_file_path + '/trace_' + user + '.csv'
     res[['Long','Lat']].to_csv(path_trace)
 
 def areColleagues (lat1,lng1,lat2,lng2):
